@@ -1,87 +1,77 @@
-/*
-	Introspect by TEMPLATED
-	templated.co @templatedco
-	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
-*/
-
 (function($) {
 
-	skel.breakpoints({
-		xlarge:	'(max-width: 1680px)',
-		large:	'(max-width: 1280px)',
-		medium:	'(max-width: 980px)',
-		small:	'(max-width: 736px)',
-		xsmall:	'(max-width: 480px)'
-	});
+	var	$window = $(window),
+		$body = $('body'),
+		$wrapper = $('#page-wrapper'),
+		$banner = $('#banner'),
+		$header = $('#header');
 
-	$(function() {
+	// Breakpoints.
+		breakpoints({
+			xlarge:   [ '1281px',  '1680px' ],
+			large:    [ '981px',   '1280px' ],
+			medium:   [ '737px',   '980px'  ],
+			small:    [ '481px',   '736px'  ],
+			xsmall:   [ null,      '480px'  ]
+		});
 
-		var	$window = $(window),
-			$body = $('body');
+	// Play initial animations on page load.
+		$window.on('load', function() {
+			window.setTimeout(function() {
+				$body.removeClass('is-preload');
+			}, 100);
+		});
 
-		// Disable animations/transitions until the page has loaded.
-			$body.addClass('is-loading');
+	// Mobile?
+		if (browser.mobile)
+			$body.addClass('is-mobile');
+		else {
 
-			$window.on('load', function() {
-				window.setTimeout(function() {
-					$body.removeClass('is-loading');
-				}, 100);
+			breakpoints.on('>medium', function() {
+				$body.removeClass('is-mobile');
 			});
 
-		// Fix: Placeholder polyfill.
-			$('form').placeholder();
-
-		// Prioritize "important" elements on medium.
-			skel.on('+medium -medium', function() {
-				$.prioritize(
-					'.important\\28 medium\\29',
-					skel.breakpoint('medium').active
-				);
+			breakpoints.on('<=medium', function() {
+				$body.addClass('is-mobile');
 			});
 
-		// Off-Canvas Navigation.
-
-			// Navigation Panel Toggle.
-				$('<a href="#navPanel" class="navPanelToggle"></a>')
-					.appendTo($body);
-
-			// Navigation Panel.
-				$(
-					'<div id="navPanel">' +
-						$('#nav').html() +
-						'<a href="#navPanel" class="close"></a>' +
-					'</div>'
-				)
-					.appendTo($body)
-					.panel({
-						delay: 500,
-						hideOnClick: true,
-						hideOnSwipe: true,
-						resetScroll: true,
-						resetForms: true,
-						side: 'left'
-					});
-
-			// Fix: Remove transitions on WP<10 (poor/buggy performance).
-				if (skel.vars.os == 'wp' && skel.vars.osVersion < 10)
-					$('#navPanel')
-						.css('transition', 'none');
-
-	});
-
-	var slideIndex = 0;
-	showSlides();
-
-	function showSlides() {
-		var i;
-		var slides = document.getElementsByClassName("mySlides");
-		for (i = 0; i < slides.length; i++) {
-		slides[i].style.display = "none";
 		}
-		slideIndex++;
-		if (slideIndex > slides.length) {slideIndex = 1}
-		slides[slideIndex-1].style.display = "block";
-		setTimeout(showSlides, 5000); // Change image every 2 seconds
-	}
+
+	// Scrolly.
+		$('.scrolly')
+			.scrolly({
+				speed: 1500,
+				offset: $header.outerHeight()
+			});
+
+	// Menu.
+		$('#menu')
+			.append('<a href="#menu" class="close"></a>')
+			.appendTo($body)
+			.panel({
+				delay: 500,
+				hideOnClick: true,
+				hideOnSwipe: true,
+				resetScroll: true,
+				resetForms: true,
+				side: 'right',
+				target: $body,
+				visibleClass: 'is-menu-visible'
+			});
+
+	// Header.
+		if ($banner.length > 0
+		&&	$header.hasClass('alt')) {
+
+			$window.on('resize', function() { $window.trigger('scroll'); });
+
+			$banner.scrollex({
+				bottom:		$header.outerHeight() + 1,
+				terminate:	function() { $header.removeClass('alt'); },
+				enter:		function() { $header.addClass('alt'); },
+				leave:		function() { $header.removeClass('alt'); }
+			});
+
+		}
 
 })(jQuery);
